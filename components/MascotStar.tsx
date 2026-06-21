@@ -70,8 +70,6 @@ export default function MascotStar({
           style={{
             width: size,
             height: size,
-            objectFit: "contain",
-            // Zoom al centro (donde está la estrella) + bordes circulares suaves
             objectFit: "cover",
             objectPosition: "center center",
             borderRadius: "50%",
