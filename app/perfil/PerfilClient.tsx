@@ -232,12 +232,12 @@ export default function PerfilClient({ profile, email, logDates }: Props) {
         </p>
         <InfoRow label="Edición" value={EDIT_LABEL[profile.can_edit] ?? profile.can_edit} />
         <InfoRow label="Frecuencia" value={FREQ_LABEL[profile.posting_frequency] ?? profile.posting_frequency} />
-        <InfoRow label="Tiempo al día" value={{
+        <InfoRow label="Tiempo al día" value={({
           "under1h": "Menos de 1 hora",
           "1-2h": "1-2 horas",
           "3-4h": "3-4 horas",
           fulltime: "Tiempo completo ✨",
-        }[profile.time_available] ?? profile.time_available} />
+        } as Record<string, string>)[profile.time_available] ?? profile.time_available} />
 
         {niches.length > 0 && (
           <div className="py-2.5 border-b border-glow-pink/10">
