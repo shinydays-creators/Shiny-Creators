@@ -44,7 +44,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
-  if (user && pathname.startsWith("/auth")) {
+  if (user && (pathname.startsWith("/auth") || pathname === "/")) {
     return NextResponse.redirect(new URL("/home", request.url));
   }
 
@@ -52,5 +52,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/onboarding/:path*", "/home/:path*", "/aprender/:path*", "/perfil/:path*", "/auth/:path*"],
+  matcher: ["/", "/dashboard/:path*", "/onboarding/:path*", "/home/:path*", "/aprender/:path*", "/perfil/:path*", "/auth/:path*"],
 };
