@@ -2,7 +2,7 @@
   "name": "Shiny Creators — Para Creadoras",
   "short_name": "Shiny Creators",
   "description": "Crece como creadora de contenido, un día a la vez.",
-  "start_url": "/",
+  "start_url": "/home",
   "display": "standalone",
   "background_color": "#FFF7FB",
   "theme_color": "#FBCB6A",

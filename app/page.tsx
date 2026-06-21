@@ -1,8 +1,13 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import MascotStar from "@/components/MascotStar";
 import ShinyTitle from "@/components/ShinyTitle";
 
-export default function WelcomePage() {
+export default async function WelcomePage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) redirect("/home");
   return (
     <main className="relative min-h-screen bg-glow-gradient flex flex-col items-center justify-between overflow-hidden px-6 py-12">
       {/* Decoración de fondo — círculos difusos */}
