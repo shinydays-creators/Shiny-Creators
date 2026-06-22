@@ -28,36 +28,39 @@ const COLLAB_TYPES = [
 ];
 
 function calcPrice(followers: number, views: number, platform: string, contentType: string, collabType: string) {
-  // Base por 1000 seguidores según plataforma
-  const cpmBase: Record<string, number> = {
-    instagram: 8, tiktok: 5, youtube: 15, pinterest: 4,
-  };
-  const cpm = cpmBase[platform] ?? 7;
+  if (collabType === "gifted") return null;
 
-  // Factor por tipo de contenido
+  // Precio base realista mercado español por cada 10K seguidores
+  const basePer10k: Record<string, number> = {
+    instagram: 20, tiktok: 12, youtube: 35, pinterest: 8,
+  };
+  const base10k = basePer10k[platform] ?? 35;
+
+  // Base proporcional a seguidores (no lineal — los primeros 10K valen más)
+  const followerBase = base10k * Math.pow(followers / 10000, 0.75);
+
+  // Bonus por buen engagement (views / followers)
+  const engagementRate = followers > 0 ? views / followers : 0.05;
+  const engagementBonus = engagementRate > 0.15 ? 1.3 : engagementRate > 0.08 ? 1.1 : 1.0;
+
+  // Factor tipo de contenido
   const contentFactor: Record<string, number> = {
-    post: 1, reel: 1.4, story: 0.5, video: 2, bundle: 2.8,
+    post: 1, reel: 1.2, story: 0.4, video: 1.6, bundle: 2.2,
   };
   const cf = contentFactor[contentType] ?? 1;
 
-  // Factor engagement (views/followers)
-  const engagementRate = followers > 0 ? Math.min(views / followers, 0.3) : 0.03;
-  const engagementFactor = 0.5 + engagementRate * 10;
-
   // Factor tipo colaboración
   const collabFactor: Record<string, number> = {
-    mention: 0.4, review: 0.8, sponsored: 1, ambassador: 1.8, gifted: 0,
+    mention: 0.4, review: 0.75, sponsored: 1, ambassador: 1.6,
   };
   const colFactor = collabFactor[collabType] ?? 1;
 
-  if (colFactor === 0) return null; // gifted = sin pago
+  const recommended = followerBase * engagementBonus * cf * colFactor;
+  const min = Math.round(recommended * 0.65 / 5) * 5;
+  const rec = Math.round(recommended / 5) * 5;
+  const premium = Math.round(recommended * 1.4 / 5) * 5;
 
-  const base = (followers / 1000) * cpm * cf * engagementFactor * colFactor;
-  const min = Math.round(base * 0.7 / 5) * 5;
-  const recommended = Math.round(base / 5) * 5;
-  const premium = Math.round(base * 1.5 / 5) * 5;
-
-  return { min: Math.max(min, 30), recommended: Math.max(recommended, 50), premium: Math.max(premium, 80) };
+  return { min: Math.max(min, 30), recommended: Math.max(rec, 50), premium: Math.max(premium, 75) };
 }
 
 function CalcSection() {
