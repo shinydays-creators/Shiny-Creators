@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 
 const ITEMS = [
   { href: "/aprender",      emoji: "📚", label: "Aprender"  },
-  { href: "/yo",            emoji: "🏆", label: "Victorias" },
-  { href: "/home",          emoji: "🏠", label: "Inicio"    },
   { href: "/herramientas",  emoji: "✨", label: "Herram."   },
+  { href: "/home",          emoji: "🏠", label: "Inicio"    },
+  { href: "/yo",            emoji: "🏆", label: "Victorias" },
   { href: "/perfil",        emoji: "👤", label: "Perfil"    },
 ];
 
