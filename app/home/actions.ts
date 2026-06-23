@@ -46,8 +46,8 @@ export async function logDailyActivities(activities: string[], challengeComplete
       .eq("id", user.id);
   }
 
-  // Comprobar bonus de invitación
-  await checkReferralBonuses();
+  // Comprobar bonus de invitación en background (no bloquea el guardado)
+  checkReferralBonuses().catch(() => {});
 
   return { success: true, xpGained };
 }

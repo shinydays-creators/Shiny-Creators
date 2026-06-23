@@ -83,7 +83,7 @@ export default function ShareStreakCard({ streak, xp, level, userName }: Props) 
     let lx = W / 2 - totalLogoW / 2;
 
     // ✦ dorado
-    ctx.fillStyle = "#C8860A";
+    ctx.fillStyle = "#F5C400";
     ctx.fillText("✦ ", lx, logoY);
     lx += starPrefixW;
 
@@ -98,7 +98,7 @@ export default function ShareStreakCard({ streak, xp, level, userName }: Props) 
 
     // Estrellita dorada encima como punto (offsetY ajustado)
     ctx.font = "700 8px Arial";
-    ctx.fillStyle = "#C8860A";
+    ctx.fillStyle = "#F5C400";
     ctx.fillText("✦", lx + dotlessIW / 2 - 4, logoY - 10);
 
     lx += dotlessIW;
@@ -155,7 +155,7 @@ export default function ShareStreakCard({ streak, xp, level, userName }: Props) 
 
     // Texto DÍAS DE RACHA
     ctx.font = "bold 13px Arial";
-    ctx.fillStyle = "#C8860A";
+    ctx.fillStyle = "#F5C400";
     ctx.letterSpacing = "2px";
     ctx.fillText(streak === 1 ? "DÍA DE RACHA" : "DÍAS DE RACHA", cx, 326);
     ctx.letterSpacing = "0px";
