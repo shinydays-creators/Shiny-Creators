@@ -288,7 +288,7 @@ export default function DailyTracker({
 
         {saveError && (
           <div className="mt-2 bg-red-50 border border-red-200 rounded-xl p-3 text-center">
-            <p className="font-inter text-xs text-red-600">Error: {saveError}</p>
+            <p className="font-inter text-xs text-red-600">No se pudo guardar. Inténtalo de nuevo.</p>
           </div>
         )}
       </div>
