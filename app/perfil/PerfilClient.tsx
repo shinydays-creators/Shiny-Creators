@@ -307,6 +307,18 @@ export default function PerfilClient({ profile, email, logDates }: Props) {
         </a>
       </div>
 
+      {/* Estadísticas */}
+      <a href="/estadisticas" className="block bg-white rounded-2xl shadow-soft p-4 mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">📊</span>
+          <div>
+            <p className="font-poppins text-sm font-bold text-glow-text">Mis estadísticas</p>
+            <p className="font-inter text-xs text-glow-text-muted">Actividad, rachas y progreso</p>
+          </div>
+        </div>
+        <span className="text-glow-text-muted text-lg">→</span>
+      </a>
+
       {/* Botón cerrar sesión */}
       <div className="text-center pb-4">
         <a href="/auth/login"
