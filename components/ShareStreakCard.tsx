@@ -12,6 +12,7 @@ interface Props {
 
 const W = 360;
 const H = 540;
+const SCALE = 3; // render a 3x para nitidez
 
 export default function ShareStreakCard({ streak, xp, level, userName }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -30,8 +31,11 @@ export default function ShareStreakCard({ streak, xp, level, userName }: Props) 
     if (!shown) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
+    canvas.width = W * SCALE;
+    canvas.height = H * SCALE;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+    ctx.scale(SCALE, SCALE);
 
     const img = new Image();
     img.src = "/mascot/happy.png";
@@ -79,32 +83,35 @@ export default function ShareStreakCard({ streak, xp, level, userName }: Props) 
     const cy = 180;
     const r = 72;
 
-    // Halo difuminado
-    const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 1.2);
-    halo.addColorStop(0, "rgba(251,203,106,0.45)");
-    halo.addColorStop(0.6, "rgba(251,203,106,0.15)");
-    halo.addColorStop(1, "rgba(251,203,106,0)");
-    ctx.fillStyle = halo;
+    // Halo dorado grande y muy difuminado (como la página principal)
+    const halo1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 2.5);
+    halo1.addColorStop(0, "rgba(251,203,106,0.55)");
+    halo1.addColorStop(0.4, "rgba(251,203,106,0.25)");
+    halo1.addColorStop(0.7, "rgba(251,203,106,0.08)");
+    halo1.addColorStop(1, "rgba(251,203,106,0)");
+    ctx.fillStyle = halo1;
     ctx.beginPath();
-    ctx.arc(cx, cy, r * 1.5, 0, Math.PI * 2);
+    ctx.arc(cx, cy, r * 2.5, 0, Math.PI * 2);
     ctx.fill();
 
     if (mascot) {
+      // Dibujar mascota con fade radial: nítida en el centro, desvanece en los bordes
       ctx.save();
+      // Clip a un círculo grande (no cortado bruscamente)
       ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.arc(cx, cy, r * 1.1, 0, Math.PI * 2);
       ctx.clip();
       ctx.drawImage(mascot, cx - r, cy - r, r * 2, r * 2);
       ctx.restore();
 
-      // Fade circular suave en los bordes
-      const fade = ctx.createRadialGradient(cx, cy, r * 0.55, cx, cy, r);
-      fade.addColorStop(0, "rgba(255,248,238,0)");
-      fade.addColorStop(0.7, "rgba(255,248,238,0)");
-      fade.addColorStop(1, "rgba(255,248,238,0.85)");
+      // Fade suave sobre los bordes de la mascota
+      const fade = ctx.createRadialGradient(cx, cy, r * 0.5, cx, cy, r * 1.1);
+      fade.addColorStop(0, "rgba(255,251,240,0)");
+      fade.addColorStop(0.65, "rgba(255,251,240,0)");
+      fade.addColorStop(1, "rgba(255,251,240,1)");
       ctx.fillStyle = fade;
       ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.arc(cx, cy, r * 1.1, 0, Math.PI * 2);
       ctx.fill();
     }
 
