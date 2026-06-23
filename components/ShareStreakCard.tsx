@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { levelInfo } from "@/lib/levels";
 
 interface Props {
@@ -10,31 +10,174 @@ interface Props {
   userName: string;
 }
 
+const W = 360;
+const H = 540;
+
 export default function ShareStreakCard({ streak, xp, level, userName }: Props) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [downloading, setDownloading] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [shown, setShown] = useState(false);
+  const [rendered, setRendered] = useState(false);
   const info = levelInfo(level);
   const first = userName.split(" ")[0];
 
-  async function handleDownload() {
-    if (!cardRef.current) return;
-    setDownloading(true);
-    try {
-      const html2canvas = (await import("html2canvas")).default;
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 3,
-        useCORS: true,
-        backgroundColor: null,
-        logging: false,
-      });
-      const link = document.createElement("a");
-      link.download = `shiny-racha-${streak}-dias.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-    } finally {
-      setDownloading(false);
+  const message = streak >= 30
+    ? `${first} lleva ${streak} días siendo constante.`
+    : streak >= 7
+    ? `${first} está construyendo su mejor versión, un día a la vez.`
+    : `${first} está empezando su camino como creadora.`;
+
+  useEffect(() => {
+    if (!shown) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = new Image();
+    img.src = "/mascot/happy.png";
+    img.onload = () => draw(ctx, img);
+    img.onerror = () => draw(ctx, null);
+  }, [shown, streak, xp, level, userName]);
+
+  function draw(ctx: CanvasRenderingContext2D, mascot: HTMLImageElement | null) {
+    // Fondo
+    const bg = ctx.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, "#FFF5F8");
+    bg.addColorStop(0.5, "#FFFBEE");
+    bg.addColorStop(1, "#FFF0F5");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Círculo decorativo top-right
+    const gr1 = ctx.createRadialGradient(W + 40, -40, 0, W + 40, -40, 160);
+    gr1.addColorStop(0, "rgba(255,200,50,0.18)");
+    gr1.addColorStop(1, "rgba(255,200,50,0)");
+    ctx.fillStyle = gr1;
+    ctx.beginPath();
+    ctx.arc(W + 40, -40, 160, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Círculo decorativo bottom-left
+    const gr2 = ctx.createRadialGradient(-40, H + 40, 0, -40, H + 40, 160);
+    gr2.addColorStop(0, "rgba(255,150,180,0.22)");
+    gr2.addColorStop(1, "rgba(255,150,180,0)");
+    ctx.fillStyle = gr2;
+    ctx.beginPath();
+    ctx.arc(-40, H + 40, 160, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Logo ✦ Shiny Creators
+    ctx.font = "bold 14px 'Arial'";
+    ctx.fillStyle = "#C8860A";
+    ctx.fillText("✦", W / 2 - 64, 48);
+    ctx.font = "bold 15px 'Arial'";
+    ctx.fillStyle = "#2D1B4E";
+    ctx.fillText("Shiny Creators", W / 2 - 48, 48);
+
+    // Mascota con halo dorado
+    const cx = W / 2;
+    const cy = 180;
+    const r = 72;
+
+    // Halo difuminado
+    const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 1.2);
+    halo.addColorStop(0, "rgba(251,203,106,0.45)");
+    halo.addColorStop(0.6, "rgba(251,203,106,0.15)");
+    halo.addColorStop(1, "rgba(251,203,106,0)");
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (mascot) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(mascot, cx - r, cy - r, r * 2, r * 2);
+      ctx.restore();
+
+      // Fade circular suave en los bordes
+      const fade = ctx.createRadialGradient(cx, cy, r * 0.55, cx, cy, r);
+      fade.addColorStop(0, "rgba(255,248,238,0)");
+      fade.addColorStop(0.7, "rgba(255,248,238,0)");
+      fade.addColorStop(1, "rgba(255,248,238,0.85)");
+      ctx.fillStyle = fade;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
     }
+
+    // Número de racha grande
+    ctx.font = "900 72px 'Arial Black', Arial";
+    ctx.fillStyle = "#2D1B4E";
+    ctx.textAlign = "center";
+    ctx.fillText(`${streak}`, cx + 22, 302);
+
+    // Emoji fuego — separado y alineado
+    ctx.font = "56px Arial";
+    ctx.fillText("🔥", cx - 46, 302);
+
+    // Texto DÍAS DE RACHA
+    ctx.font = "bold 13px Arial";
+    ctx.fillStyle = "#C8860A";
+    ctx.letterSpacing = "2px";
+    ctx.fillText(streak === 1 ? "DÍA DE RACHA" : "DÍAS DE RACHA", cx, 326);
+    ctx.letterSpacing = "0px";
+
+    // Pastilla nivel + XP
+    const pill = { x: cx - 100, y: 344, w: 200, h: 46, r: 16 };
+    ctx.fillStyle = "rgba(200,134,10,0.1)";
+    ctx.strokeStyle = "rgba(200,134,10,0.3)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(pill.x, pill.y, pill.w, pill.h, pill.r);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.font = "bold 13px Arial";
+    ctx.fillStyle = "#2D1B4E";
+    ctx.fillText(`${info.emoji} Nivel ${level} · ${info.name}`, cx, 366);
+    ctx.font = "12px Arial";
+    ctx.fillStyle = "#8B7FA8";
+    ctx.fillText(`${xp} XP acumulados`, cx, 382);
+
+    // Mensaje
+    ctx.font = "13px Arial";
+    ctx.fillStyle = "#6B5B8A";
+    wrapText(ctx, message + " ✨", cx, 420, 280, 20);
+
+    // Footer
+    ctx.font = "11px Arial";
+    ctx.fillStyle = "#B0A0C8";
+    ctx.fillText("shinycreators.vercel.app", cx, H - 24);
+
+    setRendered(true);
+  }
+
+  function wrapText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxW: number, lineH: number) {
+    const words = text.split(" ");
+    let line = "";
+    for (const word of words) {
+      const test = line ? line + " " + word : word;
+      if (ctx.measureText(test).width > maxW && line) {
+        ctx.fillText(line, x, y);
+        line = word;
+        y += lineH;
+      } else {
+        line = test;
+      }
+    }
+    ctx.fillText(line, x, y);
+  }
+
+  function handleDownload() {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const link = document.createElement("a");
+    link.download = `shiny-racha-${streak}-dias.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
   }
 
   if (!shown) {
@@ -49,125 +192,23 @@ export default function ShareStreakCard({ streak, xp, level, userName }: Props) 
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Tarjeta visual */}
-      <div
-        ref={cardRef}
-        className="relative overflow-hidden rounded-3xl mx-auto"
-        style={{
-          width: 320,
-          height: 480,
-          background: "linear-gradient(135deg, #FFF5F8 0%, #FFF8E8 50%, #FFF0F5 100%)",
-          fontFamily: "'Poppins', sans-serif",
-        }}
-      >
-        {/* Círculos decorativos */}
-        <div style={{
-          position: "absolute", top: -40, right: -40,
-          width: 160, height: 160,
-          borderRadius: "50%",
-          background: "rgba(255, 200, 50, 0.15)",
-        }} />
-        <div style={{
-          position: "absolute", bottom: -40, left: -40,
-          width: 160, height: 160,
-          borderRadius: "50%",
-          background: "rgba(255, 150, 180, 0.2)",
-        }} />
-
-        <div style={{ position: "relative", zIndex: 1, padding: "28px 28px 20px", height: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
-
-          {/* Logo */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 16 }}>
-            <span style={{ fontSize: 16, color: "#C8860A", fontWeight: 700, letterSpacing: 1 }}>✦</span>
-            <span style={{ fontSize: 15, fontWeight: 800, color: "#2D1B4E", letterSpacing: 0.5 }}>
-              Sh<span style={{ color: "#C8860A" }}>i</span>ny Creators
-            </span>
-          </div>
-
-          {/* Mascota con halo difuminado */}
-          <div style={{ position: "relative", width: 130, height: 130, marginBottom: 8 }}>
-            <div style={{
-              position: "absolute",
-              width: 65, height: 65,
-              background: "radial-gradient(circle, rgba(251,203,106,0.55) 0%, transparent 70%)",
-              filter: "blur(28px)",
-              top: "50%", left: "50%",
-              transform: "translate(-50%, -50%)",
-              borderRadius: "50%",
-            }} />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/mascot/happy.png"
-              alt="mascota"
-              crossOrigin="anonymous"
-              style={{
-                width: 130, height: 130,
-                objectFit: "cover",
-                objectPosition: "center",
-                borderRadius: "50%",
-                WebkitMaskImage: "radial-gradient(circle at 50% 50%, black 40%, rgba(0,0,0,0.6) 58%, transparent 72%)",
-                maskImage: "radial-gradient(circle at 50% 50%, black 40%, rgba(0,0,0,0.6) 58%, transparent 72%)",
-              }}
-            />
-          </div>
-
-          {/* Racha principal */}
-          <div style={{ textAlign: "center", marginBottom: 10 }}>
-            <div style={{ fontSize: 52, fontWeight: 900, color: "#2D1B4E", lineHeight: 1.1 }}>
-              🔥 {streak}
-            </div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#C8860A", letterSpacing: 1, marginTop: 2 }}>
-              {streak === 1 ? "DÍA DE RACHA" : "DÍAS DE RACHA"}
-            </div>
-          </div>
-
-          {/* Subtítulo */}
-          <div style={{
-            background: "rgba(200, 134, 10, 0.12)",
-            border: "1.5px solid rgba(200, 134, 10, 0.3)",
-            borderRadius: 16,
-            padding: "8px 20px",
-            textAlign: "center",
-            marginBottom: 14,
-          }}>
-            <p style={{ fontSize: 12, color: "#2D1B4E", fontWeight: 600, margin: 0 }}>
-              {info.emoji} Nivel {level} · {info.name}
-            </p>
-            <p style={{ fontSize: 11, color: "#8B7FA8", margin: "2px 0 0" }}>
-              {xp} XP acumulados
-            </p>
-          </div>
-
-          {/* Mensaje */}
-          <p style={{ fontSize: 12, color: "#6B5B8A", textAlign: "center", lineHeight: 1.5, marginBottom: 14, padding: "0 8px" }}>
-            {streak >= 30
-              ? `${first} lleva ${streak} días siendo constante. ✨`
-              : streak >= 7
-              ? `${first} está construyendo su mejor versión, un día a la vez. ✨`
-              : `${first} está empezando su camino como creadora. ✨`}
-          </p>
-
-          {/* Footer */}
-          <div style={{ marginTop: "auto", textAlign: "center" }}>
-            <p style={{ fontSize: 10, color: "#B0A0C8", fontWeight: 600, letterSpacing: 1 }}>
-              shinycreators.app
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Botones */}
+    <div className="flex flex-col gap-3 items-center">
+      <canvas
+        ref={canvasRef}
+        width={W}
+        height={H}
+        className="rounded-3xl shadow-lg w-full max-w-xs"
+      />
       <button
         onClick={handleDownload}
-        disabled={downloading}
-        className="w-full bg-gradient-to-r from-glow-gold to-glow-pink text-white font-poppins text-sm font-bold py-3 rounded-2xl disabled:opacity-60"
+        disabled={!rendered}
+        className="w-full bg-gradient-to-r from-glow-gold to-glow-pink text-white font-poppins text-sm font-bold py-3 rounded-2xl disabled:opacity-50"
       >
-        {downloading ? "Generando imagen..." : "⬇️ Descargar imagen"}
+        ⬇️ Descargar imagen
       </button>
       <button
-        onClick={() => setShown(false)}
-        className="w-full font-inter text-xs text-glow-text-muted py-1"
+        onClick={() => { setShown(false); setRendered(false); }}
+        className="font-inter text-xs text-glow-text-muted"
       >
         Cerrar
       </button>
