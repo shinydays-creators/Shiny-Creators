@@ -67,14 +67,16 @@ export default function DailyTracker({
   const router = useRouter();
   const [logs, setLogs] = useState<string[]>(initialLogs);
   const [selected, setSelected] = useState<string[]>(todayActivities);
+  const [savedActivities, setSavedActivities] = useState<string[]>(todayActivities);
   const [challengeDone, setChallengeDone] = useState(todayChallengeCompleted);
+  const [savedChallenge, setSavedChallenge] = useState(todayChallengeCompleted);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [xpToast, setXpToast] = useState<number | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const today = getLocalDate();
-  const alreadySaved = initialLogs.includes(today);
+  const savedToday = logs.includes(today);
   const streak = calculateStreak(logs);
   const record = Math.max(streak, streakRecord);
   const last7 = getLastNDays(7).reverse();
@@ -84,17 +86,22 @@ export default function DailyTracker({
   const prevLevelXp = [0, 100, 300, 700, 1500][Math.min(level - 1, 4)];
   const xpProgress = Math.min(((xp - prevLevelXp) / (nextLevelXp - prevLevelXp)) * 100, 100);
 
+  // Nuevas actividades no guardadas aún hoy
+  const newActivities = selected.filter(a => !savedActivities.includes(a));
+  const challengeIsNew = challengeDone && !savedChallenge;
+  const hasNewToSave = newActivities.length > 0 || challengeIsNew;
+
   const platformLabel: Record<string, string> = {
     youtube: "YouTube", tiktok: "TikTok", instagram: "Instagram", pinterest: "Pinterest",
   };
 
   function toggleActivity(id: string) {
-    if (alreadySaved) return;
+    if (savedActivities.includes(id)) return; // ya guardada, no se puede desmarcar
     setSelected(prev => prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]);
   }
 
   async function handleSave() {
-    if (saving || (selected.length === 0 && !challengeDone)) return;
+    if (saving || !hasNewToSave) return;
     setSaving(true);
 
     const allActivities = challengeDone ? [...selected, "challenge"] : selected;
@@ -102,8 +109,10 @@ export default function DailyTracker({
 
     if (result?.success) {
       setSaveError(null);
-      const newLogs = alreadySaved ? logs : [...logs, today];
+      const newLogs = savedToday ? logs : [...logs, today];
       setLogs(newLogs);
+      setSavedActivities(selected);
+      setSavedChallenge(challengeDone);
 
       const newStreak = calculateStreak(newLogs);
       if (newStreak > record) await updateStreakRecord(newStreak);
@@ -122,7 +131,7 @@ export default function DailyTracker({
   }
 
   const mascotMood = streak >= 7 ? "excited" : streak >= 1 ? "happy" : "neutral";
-  const hasAnythingSelected = selected.length > 0 || challengeDone;
+  
 
   return (
     <div className="w-full max-w-sm mx-auto flex flex-col gap-5">
@@ -154,7 +163,7 @@ export default function DailyTracker({
         xp={xp}
         level={level}
         totalDays={logs.length}
-        savedToday={alreadySaved}
+        savedToday={savedToday}
       />
 
       {/* Nivel y XP */}
@@ -220,7 +229,7 @@ export default function DailyTracker({
             <p className="font-inter text-sm text-glow-text leading-snug">{challenge}</p>
           </div>
           <button
-            onClick={() => !alreadySaved && setChallengeDone(p => !p)}
+            onClick={() => !savedChallenge && setChallengeDone(p => !p)}
             className={`flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
               challengeDone ? "bg-glow-gold border-glow-gold text-white" : "border-glow-gold/40"
             }`}
@@ -236,11 +245,11 @@ export default function DailyTracker({
         <div className="flex items-center gap-2 mb-1">
           <MascotStar mood={mascotMood} size={36} className="flex-shrink-0" />
           <p className="font-poppins text-sm font-bold text-glow-text">
-            {alreadySaved ? "Lo que hiciste hoy:" : "¿Qué has hecho hoy?"}
+            {savedToday ? "Lo que hiciste hoy:" : "¿Qué has hecho hoy?"}
           </p>
         </div>
         <p className="font-inter text-xs text-glow-text-muted mb-4 ml-11">
-          {alreadySaved
+          {savedToday
             ? "Tu racha está activa 🔥"
             : "Marca todo lo que hayas hecho. No necesitas publicar para avanzar."}
         </p>
@@ -251,12 +260,12 @@ export default function DailyTracker({
               <button
                 key={act.id}
                 onClick={() => toggleActivity(act.id)}
-                disabled={alreadySaved}
+                disabled={savedActivities.includes(act.id)}
                 className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
                   isSelected
                     ? "border-glow-gold bg-glow-gold/8 "
                     : "border-glow-cream bg-glow-cream/50"
-                } ${alreadySaved ? "opacity-70" : "active:scale-98"}`}
+                } ${savedActivities.includes(act.id) ? "opacity-60" : "active:scale-98"}`}
               >
                 <span className="text-lg flex-shrink-0">{act.emoji}</span>
                 <span className="font-inter text-sm text-glow-text flex-1">{act.label}</span>
@@ -271,13 +280,13 @@ export default function DailyTracker({
         </div>
 
         {/* Botón guardar */}
-        {!alreadySaved ? (
+        {!savedToday || hasNewToSave ? (
           <button
             onClick={handleSave}
-            disabled={saving || !hasAnythingSelected || isPending}
+            disabled={saving || !hasNewToSave || isPending}
             className="w-full btn-primary mt-4 text-base disabled:opacity-40"
           >
-            {saving ? "Guardando..." : hasAnythingSelected ? `✨ Guardar día (+${selected.length * 10 + (challengeDone ? 20 : 0)} XP)` : "Marca al menos una actividad"}
+            {saving ? "Guardando..." : hasNewToSave ? `✨ Guardar día (+${newActivities.length * 10 + (challengeIsNew ? 20 : 0)} XP)` : "Marca al menos una actividad nueva"}
           </button>
         ) : (
           <div className="mt-4 bg-glow-gold/10 border-2 border-glow-gold/30 rounded-xl p-3 text-center">

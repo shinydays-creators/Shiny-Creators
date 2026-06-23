@@ -15,6 +15,17 @@ export async function logDailyActivities(activities: string[], challengeComplete
 
   const today = getLocalDate();
 
+  // Ver qué había guardado antes hoy (para calcular solo XP nuevo)
+  const { data: existing } = await supabase
+    .from("daily_logs")
+    .select("activities, challenge_completed")
+    .eq("user_id", user.id)
+    .eq("log_date", today)
+    .single();
+
+  const previousActivities: string[] = existing?.activities ?? [];
+  const previousChallenge: boolean = existing?.challenge_completed ?? false;
+
   // Upsert del log de hoy
   const { error } = await supabase
     .from("daily_logs")
@@ -27,8 +38,10 @@ export async function logDailyActivities(activities: string[], challengeComplete
 
   if (error) return { error: error.message };
 
-  // Calcular y actualizar XP
-  const xpGained = activities.length * XP_PER_ACTIVITY + (challengeCompleted ? XP_CHALLENGE : 0);
+  // Solo sumar XP por actividades NUEVAS respecto a lo ya guardado
+  const newActivities = activities.filter(a => !previousActivities.includes(a));
+  const challengeIsNew = challengeCompleted && !previousChallenge;
+  const xpGained = newActivities.length * XP_PER_ACTIVITY + (challengeIsNew ? XP_CHALLENGE : 0);
   if (xpGained > 0) {
     const { data: profile } = await supabase
       .from("profiles")
