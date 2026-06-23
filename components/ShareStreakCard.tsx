@@ -85,14 +85,32 @@ export default function ShareStreakCard({ streak, xp, level, userName }: Props) 
             </span>
           </div>
 
-          {/* Mascota */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/mascot/happy.png"
-            alt="mascota"
-            crossOrigin="anonymous"
-            style={{ width: 130, height: 130, objectFit: "contain", marginBottom: 8 }}
-          />
+          {/* Mascota con halo difuminado */}
+          <div style={{ position: "relative", width: 130, height: 130, marginBottom: 8 }}>
+            <div style={{
+              position: "absolute",
+              width: 65, height: 65,
+              background: "radial-gradient(circle, rgba(251,203,106,0.55) 0%, transparent 70%)",
+              filter: "blur(28px)",
+              top: "50%", left: "50%",
+              transform: "translate(-50%, -50%)",
+              borderRadius: "50%",
+            }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/mascot/happy.png"
+              alt="mascota"
+              crossOrigin="anonymous"
+              style={{
+                width: 130, height: 130,
+                objectFit: "cover",
+                objectPosition: "center",
+                borderRadius: "50%",
+                WebkitMaskImage: "radial-gradient(circle at 50% 50%, black 40%, rgba(0,0,0,0.6) 58%, transparent 72%)",
+                maskImage: "radial-gradient(circle at 50% 50%, black 40%, rgba(0,0,0,0.6) 58%, transparent 72%)",
+              }}
+            />
+          </div>
 
           {/* Racha principal */}
           <div style={{ textAlign: "center", marginBottom: 10 }}>
