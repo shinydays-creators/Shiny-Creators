@@ -70,36 +70,41 @@ export default function ShareStreakCard({ streak, xp, level, userName }: Props) 
     ctx.arc(-40, H + 40, 160, 0, Math.PI * 2);
     ctx.fill();
 
-    // Logo — ✦ Sh[i sin punto]ny Creators
-    ctx.textAlign = "center";
-    const logoY = 48;
-    // Medir partes para centrar todo
+    // Logo — ✦ Sh[ı+estrella]ny Creators
+    ctx.textAlign = "left";
     ctx.font = "800 16px Arial";
-    const starW = ctx.measureText("✦ ").width;
+    const logoY = 48;
+
+    const starPrefixW = ctx.measureText("✦ ").width;
     const shW = ctx.measureText("Sh").width;
-    const inyW = ctx.measureText("ny Creators").width;
-    const dotW = ctx.measureText("i").width;
-    const totalW = starW + shW + dotW + inyW;
-    let lx = W / 2 - totalW / 2;
+    const dotlessIW = ctx.measureText("ı").width; // i sin punto U+0131
+    const restW = ctx.measureText("ny Creators").width;
+    const totalLogoW = starPrefixW + shW + dotlessIW + restW;
+    let lx = W / 2 - totalLogoW / 2;
 
     // ✦ dorado
-    ctx.font = "800 16px Arial";
     ctx.fillStyle = "#C8860A";
-    ctx.textAlign = "left";
     ctx.fillText("✦ ", lx, logoY);
-    lx += starW;
+    lx += starPrefixW;
 
     // "Sh" oscuro
     ctx.fillStyle = "#2D1B4E";
     ctx.fillText("Sh", lx, logoY);
     lx += shW;
 
-    // "i" dorado (sin punto — en canvas no podemos quitar el punto, pero lo coloreamos dorado)
+    // "ı" oscuro (sin punto)
+    ctx.fillStyle = "#2D1B4E";
+    ctx.fillText("ı", lx, logoY);
+
+    // Estrellita dorada encima como punto (offsetY ajustado)
+    ctx.font = "700 8px Arial";
     ctx.fillStyle = "#C8860A";
-    ctx.fillText("i", lx, logoY);
-    lx += dotW;
+    ctx.fillText("✦", lx + dotlessIW / 2 - 4, logoY - 10);
+
+    lx += dotlessIW;
 
     // "ny Creators" oscuro
+    ctx.font = "800 16px Arial";
     ctx.fillStyle = "#2D1B4E";
     ctx.fillText("ny Creators", lx, logoY);
     ctx.textAlign = "center";
