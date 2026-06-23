@@ -27,7 +27,7 @@ export default function InvitacionesClient({ referralCode, referrals, hasBeenRef
   const first = userName.split(" ")[0];
   const totalInvited = referrals.length;
   const bonusGiven = referrals.filter(r => r.bonus_given).length;
-  const xpEarned = bonusGiven * 150;
+  const xpEarned = bonusGiven * 75;
 
   function copyCode() {
     navigator.clipboard.writeText(referralCode);
@@ -124,7 +124,7 @@ export default function InvitacionesClient({ referralCode, referrals, hasBeenRef
             { emoji: "📲", text: `Comparte tu código ${referralCode} con una amiga creadora` },
             { emoji: "✍️", text: "Ella se registra en Shiny Creators y escribe tu código" },
             { emoji: "🎁", text: "Ella recibe +50 XP de bienvenida al instante" },
-            { emoji: "🔥", text: "Cuando lleve 7 días activa, tú recibes +150 XP" },
+            { emoji: "🔥", text: "Cuando lleve 7 días activa, tú recibes +75 XP" },
           ].map((step, i) => (
             <div key={i} className="flex items-start gap-3">
               <span className="text-lg">{step.emoji}</span>

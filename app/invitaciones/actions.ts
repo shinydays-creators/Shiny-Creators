@@ -80,7 +80,7 @@ export async function checkReferralBonuses() {
       .single();
 
     await supabase.from("profiles").update({
-      xp: (inviter?.xp ?? 0) + 150,
+      xp: (inviter?.xp ?? 0) + 75,
     }).eq("id", referral.inviter_id);
 
     await supabase.from("referrals").update({ bonus_given: true }).eq("id", referral.id);
