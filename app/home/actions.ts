@@ -8,7 +8,7 @@ import { checkReferralBonuses } from "@/app/invitaciones/actions";
 const XP_PER_ACTIVITY = 10;
 const XP_CHALLENGE = 20;
 
-export async function logDailyActivities(activities: string[], challengeCompleted: boolean, challengeText: string) {
+export async function logDailyActivities(activities: string[], challengeCompleted: boolean, _challengeText: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "No hay sesión" };
@@ -23,7 +23,6 @@ export async function logDailyActivities(activities: string[], challengeComplete
       log_date: today,
       activities,
       challenge_completed: challengeCompleted,
-      challenge_text: challengeText,
     }, { onConflict: "user_id,log_date" });
 
   if (error) return { error: error.message };
