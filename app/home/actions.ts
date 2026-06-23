@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getLocalDate } from "@/lib/streak";
 import { calculateLevel } from "@/lib/levels";
+import { checkReferralBonuses } from "@/app/invitaciones/actions";
 
 const XP_PER_ACTIVITY = 10;
 const XP_CHALLENGE = 20;
@@ -44,6 +45,9 @@ export async function logDailyActivities(activities: string[], challengeComplete
       .update({ xp: currentXp, level: newLevel })
       .eq("id", user.id);
   }
+
+  // Comprobar bonus de invitación
+  await checkReferralBonuses();
 
   return { success: true, xpGained };
 }
