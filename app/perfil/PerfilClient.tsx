@@ -307,6 +307,18 @@ export default function PerfilClient({ profile, email, logDates }: Props) {
         </a>
       </div>
 
+      {/* Cápsula del tiempo */}
+      <a href="/capsula" className="block bg-white rounded-2xl shadow-soft p-4 mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🕰️</span>
+          <div>
+            <p className="font-poppins text-sm font-bold text-glow-text">Cápsula del tiempo</p>
+            <p className="font-inter text-xs text-glow-text-muted">Objetivos mensuales y reflexiones</p>
+          </div>
+        </div>
+        <span className="text-glow-text-muted text-lg">→</span>
+      </a>
+
       {/* Estadísticas */}
       <a href="/estadisticas" className="block bg-white rounded-2xl shadow-soft p-4 mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
