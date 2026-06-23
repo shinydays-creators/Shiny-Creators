@@ -6,6 +6,7 @@ import MascotStar from "@/components/MascotStar";
 import { calculateStreak, getLocalDate, getLastNDays, shortDayName } from "@/lib/streak";
 import { logDailyActivities, updateStreakRecord } from "@/app/home/actions";
 import { levelInfo } from "@/lib/levels";
+import MotivationalBanner from "@/components/MotivationalBanner";
 
 const ACTIVITIES = [
   { id: "publish",   emoji: "📤", label: "Publicar contenido" },
@@ -139,6 +140,17 @@ export default function DailyTracker({
           </p>
         )}
       </div>
+
+      {/* Banner motivador */}
+      <MotivationalBanner
+        userName={userName}
+        streak={streak}
+        streakRecord={record}
+        xp={xp}
+        level={level}
+        totalDays={logs.length}
+        savedToday={alreadySaved}
+      />
 
       {/* Nivel y XP */}
       <div className="bg-white rounded-2xl shadow-soft p-4">
