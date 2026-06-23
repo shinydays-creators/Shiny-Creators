@@ -7,6 +7,7 @@ import { calculateStreak, getLocalDate, getLastNDays, shortDayName } from "@/lib
 import { logDailyActivities, updateStreakRecord } from "@/app/home/actions";
 import { levelInfo } from "@/lib/levels";
 import MotivationalBanner from "@/components/MotivationalBanner";
+import ShareStreakCard from "@/components/ShareStreakCard";
 
 const ACTIVITIES = [
   { id: "publish",   emoji: "📤", label: "Publicar contenido" },
@@ -289,6 +290,16 @@ export default function DailyTracker({
             🏆 Tu mejor racha: <span className="font-semibold text-glow-text">{record} {record === 1 ? "día" : "días"}</span>
           </p>
         </div>
+      )}
+
+      {/* Compartir racha */}
+      {streak > 0 && (
+        <ShareStreakCard
+          streak={streak}
+          xp={xp}
+          level={level}
+          userName={userName}
+        />
       )}
 
     </div>
