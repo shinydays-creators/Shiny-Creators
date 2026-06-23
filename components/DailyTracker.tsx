@@ -69,6 +69,7 @@ export default function DailyTracker({
   const [selected, setSelected] = useState<string[]>(todayActivities);
   const [challengeDone, setChallengeDone] = useState(todayChallengeCompleted);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [xpToast, setXpToast] = useState<number | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -100,6 +101,7 @@ export default function DailyTracker({
     const result = await logDailyActivities(allActivities, challengeDone, challenge);
 
     if (result?.success) {
+      setSaveError(null);
       const newLogs = alreadySaved ? logs : [...logs, today];
       setLogs(newLogs);
 
@@ -112,6 +114,8 @@ export default function DailyTracker({
       }
 
       startTransition(() => router.refresh());
+    } else {
+      setSaveError(result?.error ?? "Error desconocido");
     }
 
     setSaving(false);
@@ -279,6 +283,12 @@ export default function DailyTracker({
           <div className="mt-4 bg-glow-gold/10 border-2 border-glow-gold/30 rounded-xl p-3 text-center">
             <p className="font-poppins font-semibold text-glow-text text-sm">✅ ¡Día registrado!</p>
             <p className="font-inter text-xs text-glow-text-muted mt-0.5">Vuelve mañana para seguir tu racha 🌟</p>
+          </div>
+        )}
+
+        {saveError && (
+          <div className="mt-2 bg-red-50 border border-red-200 rounded-xl p-3 text-center">
+            <p className="font-inter text-xs text-red-600">Error: {saveError}</p>
           </div>
         )}
       </div>
