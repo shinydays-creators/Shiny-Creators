@@ -177,8 +177,9 @@ export default function DailyTracker({
         savedToday={savedToday}
       />
 
-      {/* Nivel y XP */}
+      {/* Nivel + 7 días fusionados */}
       <div className="bg-white rounded-2xl shadow-soft p-4">
+        {/* Nivel y XP */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <span className="text-lg">{info.emoji}</span>
@@ -193,21 +194,22 @@ export default function DailyTracker({
             </span>
           )}
         </div>
-        <div className="h-2 bg-glow-cream rounded-full overflow-hidden">
+        <div className="h-2 bg-glow-cream rounded-full overflow-hidden mb-1">
           <div
             className="h-full bg-gradient-to-r from-glow-gold to-glow-pink rounded-full transition-all duration-700"
             style={{ width: `${xpProgress}%` }}
           />
         </div>
         {level < 5 && (
-          <p className="font-inter text-xs text-glow-text-muted mt-1.5 text-right">
+          <p className="font-inter text-xs text-glow-text-muted mb-4 text-right">
             {nextLevelXp - xp} XP para el siguiente nivel
           </p>
         )}
-      </div>
 
-      {/* Tira 7 días */}
-      <div className="bg-white rounded-2xl shadow-soft p-4">
+        {/* Divisor */}
+        <div className="border-t border-glow-cream mb-3" />
+
+        {/* Tira 7 días */}
         <p className="font-poppins text-xs font-semibold text-glow-text-muted uppercase tracking-widest mb-3 text-center">
           Últimos 7 días
         </p>
@@ -233,13 +235,15 @@ export default function DailyTracker({
         </div>
       </div>
 
-      {/* Reto diario */}
-      <div className={`bg-white rounded-2xl shadow-soft p-4 border-2 transition-colors ${challengeDone ? "border-glow-gold/40 bg-glow-gold/5" : "border-transparent"}`}>
-        <div className="flex items-start gap-3">
-          <span className="text-2xl mt-0.5">⭐</span>
+      {/* Reto + Actividades fusionados */}
+      <div className="bg-white rounded-2xl shadow-soft p-4">
+        {/* Reto de hoy */}
+        <div className={`flex items-start gap-3 pb-3 mb-3 border-b-2 transition-colors ${challengeDone ? "border-glow-gold/30" : "border-glow-cream"}`}>
+          <span className="text-xl mt-0.5">⭐</span>
           <div className="flex-1">
             <p className="font-poppins text-xs font-bold text-glow-text-muted uppercase tracking-widest mb-1">Reto de hoy</p>
             <p className="font-inter text-sm text-glow-text leading-snug">{challenge}</p>
+            {challengeDone && <p className="font-inter text-xs text-glow-gold-dark font-semibold mt-1">+20 XP · ¡Reto completado! 🎉</p>}
           </div>
           <button
             onClick={() => !savedChallenge && setChallengeDone(p => !p)}
@@ -250,21 +254,16 @@ export default function DailyTracker({
             {challengeDone && <span className="text-sm font-bold">✓</span>}
           </button>
         </div>
-        {challengeDone && <p className="font-inter text-xs text-glow-gold-dark font-semibold mt-2 ml-9">+20 XP · ¡Reto completado! 🎉</p>}
-      </div>
 
-      {/* Registro de actividades */}
-      <div className="bg-white rounded-2xl shadow-soft p-4">
+        {/* Actividades */}
         <div className="flex items-center gap-2 mb-1">
-          <MascotStar mood={mascotMood} size={36} className="flex-shrink-0" />
+          <MascotStar mood={mascotMood} size={32} className="flex-shrink-0" />
           <p className="font-poppins text-sm font-bold text-glow-text">
             {savedToday ? "Lo que hiciste hoy:" : "¿Qué has hecho hoy?"}
           </p>
         </div>
-        <p className="font-inter text-xs text-glow-text-muted mb-4 ml-11">
-          {savedToday
-            ? "Tu racha está activa 🔥"
-            : "Marca todo lo que hayas hecho. No necesitas publicar para avanzar."}
+        <p className="font-inter text-xs text-glow-text-muted mb-3 ml-10">
+          {savedToday ? "Tu racha está activa 🔥" : "Marca todo lo que hayas hecho."}
         </p>
         <div className="flex flex-col gap-2">
           {ACTIVITIES.map((act) => {
@@ -275,9 +274,7 @@ export default function DailyTracker({
                 onClick={() => toggleActivity(act.id)}
                 disabled={savedActivities.includes(act.id)}
                 className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
-                  isSelected
-                    ? "border-glow-gold bg-glow-gold/8 "
-                    : "border-glow-cream bg-glow-cream/50"
+                  isSelected ? "border-glow-gold bg-glow-gold/8" : "border-glow-cream bg-glow-cream/50"
                 } ${savedActivities.includes(act.id) ? "opacity-60" : "active:scale-98"}`}
               >
                 <span className="text-lg flex-shrink-0">{act.emoji}</span>
@@ -317,26 +314,30 @@ export default function DailyTracker({
 
       {/* Récord */}
       {record > 0 && (
-        <div className="text-center pb-2">
+        <div className="text-center pb-1">
           <p className="font-inter text-xs text-glow-text-muted">
             🏆 Tu mejor racha: <span className="font-semibold text-glow-text">{record} {record === 1 ? "día" : "días"}</span>
           </p>
         </div>
       )}
 
-      {/* Comunidad */}
+      {/* Comunidad — tarjeta destacada */}
       <a
         href="/ranking"
-        className="flex items-center justify-between bg-white rounded-2xl shadow-soft px-5 py-4 active:scale-95 transition-all duration-200"
+        className="block rounded-3xl overflow-hidden shadow-soft active:scale-95 transition-all duration-200"
+        style={{ background: "linear-gradient(135deg, #FBCB6A 0%, #FECFE4 100%)" }}
       >
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">🌟</span>
+        <div className="px-5 py-5 flex items-center justify-between">
           <div>
-            <p className="font-poppins text-sm font-bold text-glow-text">Comunidad</p>
-            <p className="font-inter text-xs text-glow-text-muted">Ver el ranking de creadoras</p>
+            <p className="font-poppins text-base font-black text-glow-text">🌟 Comunidad</p>
+            <p className="font-inter text-xs text-glow-text/70 mt-0.5">Ver el ranking de creadoras</p>
+            <p className="font-inter text-[10px] text-glow-text/50 mt-1">¿En qué posición estás tú?</p>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-4xl">🏅</span>
+            <span className="font-poppins text-xs font-bold text-glow-text/60">Ver →</span>
           </div>
         </div>
-        <span className="text-glow-text-muted text-lg">→</span>
       </a>
 
       {/* Compartir racha */}
