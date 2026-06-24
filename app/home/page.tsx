@@ -10,21 +10,17 @@ export default async function HomePage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
   const since = new Date();
   since.setDate(since.getDate() - 90);
 
-  const { data: logs } = await supabase
-    .from("daily_logs")
-    .select("log_date, activities, challenge_completed")
-    .eq("user_id", user.id)
-    .gte("log_date", since.toISOString().split("T")[0])
-    .order("log_date", { ascending: false });
+  const [{ data: profile }, { data: logs }] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    supabase.from("daily_logs")
+      .select("log_date, activities, challenge_completed")
+      .eq("user_id", user.id)
+      .gte("log_date", since.toISOString().split("T")[0])
+      .order("log_date", { ascending: false }),
+  ]);
 
   const today = getLocalDate();
   const todayLog = (logs ?? []).find(l => l.log_date === today);
