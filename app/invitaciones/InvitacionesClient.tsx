@@ -154,7 +154,7 @@ export default function InvitacionesClient({ referralCode, referrals, hasBeenRef
                 </div>
                 {r.bonus_given ? (
                   <span className="font-inter text-xs font-bold text-glow-gold-dark bg-glow-gold/10 px-2 py-1 rounded-full">
-                    +150 XP ✅
+                    +75 XP ✅
                   </span>
                 ) : (
                   <div className="flex flex-col items-end gap-1">
