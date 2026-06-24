@@ -324,6 +324,21 @@ export default function DailyTracker({
         </div>
       )}
 
+      {/* Comunidad */}
+      <a
+        href="/ranking"
+        className="flex items-center justify-between bg-white rounded-2xl shadow-soft px-5 py-4 active:scale-95 transition-all duration-200"
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🌟</span>
+          <div>
+            <p className="font-poppins text-sm font-bold text-glow-text">Comunidad</p>
+            <p className="font-inter text-xs text-glow-text-muted">Ver el ranking de creadoras</p>
+          </div>
+        </div>
+        <span className="text-glow-text-muted text-lg">→</span>
+      </a>
+
       {/* Compartir racha */}
       {streak > 0 && (
         <ShareStreakCard
