@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { calculateStreak } from "@/lib/streak";
 import ShinyTitle from "@/components/ShinyTitle";
+import Avatar from "@/components/Avatar";
 
 // ─── Labels legibles ──────────────────────────────────────────────────────────
 
@@ -33,26 +34,18 @@ function formatTags(raw: string | null): string[] {
   return raw.split(",").filter(Boolean);
 }
 
-// ─── Avatar con iniciales ─────────────────────────────────────────────────────
+// ─── Colores disponibles ──────────────────────────────────────────────────────
 
-function Avatar({ name, size = 80 }: { name: string; size?: number }) {
-  const initials = name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-  return (
-    <div
-      className="rounded-full bg-gradient-to-br from-glow-gold to-glow-pink flex items-center justify-center shadow-soft-lg flex-shrink-0"
-      style={{ width: size, height: size }}
-    >
-      <span className="font-poppins font-bold text-glow-text" style={{ fontSize: size * 0.35 }}>
-        {initials || "✨"}
-      </span>
-    </div>
-  );
-}
+const AVATAR_COLORS = [
+  "#F5C400", // dorado
+  "#F97FAB", // rosa
+  "#A78BFA", // violeta
+  "#34D399", // verde
+  "#60A5FA", // azul
+  "#FB923C", // naranja
+  "#F87171", // rojo suave
+  "#2D1B4E", // morado oscuro
+];
 
 // ─── Fila de info ─────────────────────────────────────────────────────────────
 
@@ -80,6 +73,8 @@ export default function PerfilClient({ profile, email, logDates }: Props) {
   const [saving, setSaving] = useState(false);
   const [fullName, setFullName] = useState(profile.full_name ?? "");
   const [saved, setSaved] = useState(false);
+  const [avatarColor, setAvatarColor] = useState(profile.avatar_color ?? "#F5C400");
+  const [pickingColor, setPickingColor] = useState(false);
 
   const displayName = fullName || email.split("@")[0];
   const streak = calculateStreak(logDates);
@@ -117,13 +112,23 @@ export default function PerfilClient({ profile, email, logDates }: Props) {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       await supabase.from("profiles")
-        .update({ full_name: fullName })
+        .update({ full_name: fullName, avatar_color: avatarColor })
         .eq("id", user.id);
     }
     setSaving(false);
     setEditing(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  }
+
+  async function handleColorChange(color: string) {
+    setAvatarColor(color);
+    setPickingColor(false);
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from("profiles").update({ avatar_color: color }).eq("id", user.id);
+    }
   }
 
   return (
@@ -142,7 +147,30 @@ export default function PerfilClient({ profile, email, logDates }: Props) {
       {/* Tarjeta de perfil principal */}
       <div className="bg-white rounded-3xl shadow-soft-lg p-5 mb-4">
         <div className="flex items-center gap-4">
-          <Avatar name={displayName} size={72} />
+          <div className="relative">
+            <Avatar name={displayName} color={avatarColor} size="lg" />
+            <button
+              onClick={() => setPickingColor(p => !p)}
+              className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full shadow border border-glow-pink/20 flex items-center justify-center text-xs"
+            >
+              🎨
+            </button>
+            {pickingColor && (
+              <div className="absolute top-full left-0 mt-2 bg-white rounded-2xl shadow-lg p-3 z-20 flex flex-wrap gap-2 w-44">
+                {AVATAR_COLORS.map(c => (
+                  <button
+                    key={c}
+                    onClick={() => handleColorChange(c)}
+                    className="w-8 h-8 rounded-full border-2 transition-transform hover:scale-110"
+                    style={{
+                      backgroundColor: c,
+                      borderColor: c === avatarColor ? "#2D1B4E" : "transparent",
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
           <div className="flex-1 min-w-0">
             {editing ? (
               <input
