@@ -335,6 +335,18 @@ export default function PerfilClient({ profile, email, logDates }: Props) {
         </a>
       </div>
 
+      {/* Comunidad */}
+      <a href="/ranking" className="block bg-white rounded-2xl shadow-soft p-4 mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🌟</span>
+          <div>
+            <p className="font-poppins text-sm font-bold text-glow-text">Comunidad</p>
+            <p className="font-inter text-xs text-glow-text-muted">Ranking de creadoras más constantes</p>
+          </div>
+        </div>
+        <span className="text-glow-text-muted text-lg">→</span>
+      </a>
+
       {/* Invitaciones */}
       <a href="/invitaciones" className="block bg-white rounded-2xl shadow-soft p-4 mb-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
