@@ -143,16 +143,27 @@ export default function DailyTracker({
         </div>
       )}
 
-      {/* Saludo */}
-      <div className="text-center pt-2">
-        <h1 className="font-poppins text-2xl font-bold text-glow-text">
-          ¡Hola, {userName}! 👋
-        </h1>
-        {platform && (
-          <p className="font-inter text-sm text-glow-text-muted mt-0.5">
-            {platformLabel[platform] ?? platform} creator ✨
+      {/* Hero — racha prominente + mascota */}
+      <div className="bg-white rounded-3xl shadow-soft px-5 pt-5 pb-4 flex items-center gap-4">
+        <MascotStar mood={mascotMood} size={90} animate />
+        <div className="flex-1">
+          <p className="font-inter text-xs text-glow-text-muted mb-0.5">
+            ¡Hola, {userName}! 👋
           </p>
-        )}
+          <div className="flex items-end gap-2">
+            <span className="font-poppins text-6xl font-black text-glow-text leading-none">{streak}</span>
+            <div className="pb-1">
+              <p className="font-poppins text-sm font-bold text-glow-gold-dark leading-tight">🔥 días</p>
+              <p className="font-inter text-[10px] text-glow-text-muted leading-tight">de racha</p>
+            </div>
+          </div>
+          {record > 0 && streak < record && (
+            <p className="font-inter text-[10px] text-glow-text-muted mt-1">🏆 Récord: {record} días</p>
+          )}
+          {streak > 0 && streak === record && streak > 1 && (
+            <p className="font-inter text-[10px] text-glow-gold-dark mt-1 font-semibold">🏆 ¡Tu mejor racha!</p>
+          )}
+        </div>
       </div>
 
       {/* Banner motivador */}
@@ -176,9 +187,11 @@ export default function DailyTracker({
               <p className="font-inter text-xs text-glow-text-muted">{xp} XP acumulados</p>
             </div>
           </div>
-          <span className="font-poppins text-xs font-semibold text-glow-gold-dark bg-glow-gold/10 px-2 py-1 rounded-full">
-            🔥 {streak} días
-          </span>
+          {platform && (
+            <span className="font-inter text-[10px] text-glow-text-muted bg-glow-cream px-2 py-1 rounded-full">
+              {platformLabel[platform] ?? platform}
+            </span>
+          )}
         </div>
         <div className="h-2 bg-glow-cream rounded-full overflow-hidden">
           <div
