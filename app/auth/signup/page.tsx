@@ -10,60 +10,58 @@ import ShinyTitle from "@/components/ShinyTitle";
 
 export default function SignupPage() {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [emailConfirm, setEmailConfirm] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
 
+    if (email.toLowerCase() !== emailConfirm.toLowerCase()) {
+      setError("Los emails no coinciden. Compruébalo.");
+      return;
+    }
+
+    if (name.trim().length < 2) {
+      setError("Pon tu nombre, aunque sea solo tu nombre de pila.");
+      return;
+    }
+
+    setLoading(true);
+
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: { full_name: name.trim() },
       },
     });
 
-    setLoading(false);
-
-    if (error) {
+    if (signUpError) {
+      setLoading(false);
       setError(
-        error.message === "User already registered"
+        signUpError.message === "User already registered"
           ? "Ya existe una cuenta con ese email. ¿Quieres iniciar sesión?"
-          : error.message
+          : signUpError.message
       );
       return;
     }
 
-    setSuccess(true);
-  }
+    // Guardar nombre en profiles
+    if (data.user) {
+      await supabase
+        .from("profiles")
+        .update({ full_name: name.trim() })
+        .eq("id", data.user.id);
+    }
 
-  if (success) {
-    return (
-      <main className="min-h-screen bg-glow-gradient flex flex-col items-center justify-center px-6">
-        <div className="w-full max-w-sm text-center animate-fade-up">
-          <MascotStar mood="excited" size={140} animate className="mx-auto mb-6" />
-          <h2 className="font-poppins text-2xl font-semibold text-glow-text">
-            ¡Ya casi estás! 🎉
-          </h2>
-          <p className="mt-3 font-inter text-sm text-glow-text-muted leading-relaxed">
-            Te hemos enviado un email de confirmación a{" "}
-            <span className="font-semibold text-glow-text">{email}</span>
-            <br />
-            Revisa tu bandeja de entrada (y spam) para activar tu cuenta.
-          </p>
-          <Link href="/auth/login" className="mt-8 btn-secondary inline-block">
-            Ir al inicio de sesión
-          </Link>
-        </div>
-      </main>
-    );
+    router.push("/onboarding");
+    router.refresh();
   }
 
   return (
@@ -92,6 +90,24 @@ export default function SignupPage() {
         {/* Formulario */}
         <div className="card-glow">
           <form onSubmit={handleSignup} className="flex flex-col gap-4">
+
+            {/* Nombre */}
+            <div>
+              <label className="font-poppins text-xs font-semibold text-glow-text-muted uppercase tracking-wider block mb-2">
+                Tu nombre
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="¿Cómo te llamamos?"
+                className="input-glow"
+                required
+                autoComplete="given-name"
+              />
+            </div>
+
+            {/* Email */}
             <div>
               <label className="font-poppins text-xs font-semibold text-glow-text-muted uppercase tracking-wider block mb-2">
                 Email
@@ -107,6 +123,35 @@ export default function SignupPage() {
               />
             </div>
 
+            {/* Confirmar email */}
+            <div>
+              <label className="font-poppins text-xs font-semibold text-glow-text-muted uppercase tracking-wider block mb-2">
+                Confirma tu email
+              </label>
+              <input
+                type="email"
+                value={emailConfirm}
+                onChange={(e) => setEmailConfirm(e.target.value)}
+                placeholder="Repite tu email"
+                className={`input-glow ${
+                  emailConfirm && email.toLowerCase() !== emailConfirm.toLowerCase()
+                    ? "border-red-300 focus:border-red-400"
+                    : emailConfirm && email.toLowerCase() === emailConfirm.toLowerCase()
+                    ? "border-green-300 focus:border-green-400"
+                    : ""
+                }`}
+                required
+                autoComplete="off"
+              />
+              {emailConfirm && email.toLowerCase() !== emailConfirm.toLowerCase() && (
+                <p className="font-inter text-xs text-red-500 mt-1">Los emails no coinciden</p>
+              )}
+              {emailConfirm && email.toLowerCase() === emailConfirm.toLowerCase() && (
+                <p className="font-inter text-xs text-green-600 mt-1">✓ Emails coinciden</p>
+              )}
+            </div>
+
+            {/* Contraseña */}
             <div>
               <label className="font-poppins text-xs font-semibold text-glow-text-muted uppercase tracking-wider block mb-2">
                 Contraseña
