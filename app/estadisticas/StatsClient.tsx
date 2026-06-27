@@ -124,34 +124,74 @@ export default function StatsClient({ logs, xp, level, streakRecord, userName }:
         </div>
       </div>
 
-      {/* Mapa de actividad — últimas 12 semanas */}
+      {/* Calendario del mes actual */}
       <div className="bg-white rounded-2xl shadow-soft p-4 mb-4">
         <p className="font-poppins text-xs font-bold text-glow-text-muted uppercase tracking-widest mb-3">
-          Últimas 12 semanas
+          Este mes — {monthNames[new Date().toISOString().slice(5,7)]} {new Date().getFullYear()}
         </p>
-        <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(12, 1fr)" }}>
-          {Array.from({ length: 12 }, (_, week) => (
-            <div key={week} className="flex flex-col gap-1">
-              {Array.from({ length: 7 }, (_, day) => {
-                const idx = week * 7 + day;
-                const date = last84[idx];
-                const active = date ? logSet.has(date) : false;
-                return (
-                  <div
-                    key={day}
-                    className={`w-full aspect-square rounded-sm ${active ? "bg-glow-gold" : "bg-glow-cream"}`}
-                  />
-                );
-              })}
-            </div>
-          ))}
-        </div>
-        <div className="flex items-center gap-2 mt-2 justify-end">
-          <div className="w-3 h-3 rounded-sm bg-glow-cream" />
-          <span className="font-inter text-xs text-glow-text-muted">Sin actividad</span>
-          <div className="w-3 h-3 rounded-sm bg-glow-gold" />
-          <span className="font-inter text-xs text-glow-text-muted">Activa</span>
-        </div>
+        {(() => {
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = now.getMonth();
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+          const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0=Dom
+          // Convertir a lunes=0
+          const startOffset = (firstDayOfWeek + 6) % 7;
+          const todayStr = now.toLocaleDateString("en-CA");
+          const dayNames = ["L","M","X","J","V","S","D"];
+          const cells: (number | null)[] = [
+            ...Array(startOffset).fill(null),
+            ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+          ];
+          // Pad to complete last row
+          while (cells.length % 7 !== 0) cells.push(null);
+
+          return (
+            <>
+              {/* Cabecera días */}
+              <div className="grid grid-cols-7 mb-1">
+                {dayNames.map(d => (
+                  <div key={d} className="text-center font-inter text-[10px] text-glow-text-muted font-semibold py-1">{d}</div>
+                ))}
+              </div>
+              {/* Días */}
+              <div className="grid grid-cols-7 gap-1">
+                {cells.map((day, i) => {
+                  if (!day) return <div key={i} />;
+                  const dateStr = `${year}-${String(month + 1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+                  const active = logSet.has(dateStr);
+                  const isToday = dateStr === todayStr;
+                  const isFuture = dateStr > todayStr;
+                  return (
+                    <div
+                      key={i}
+                      className={`aspect-square rounded-lg flex items-center justify-center
+                        ${active ? "bg-glow-gold shadow-sm" : isFuture ? "bg-glow-cream/30" : "bg-glow-cream"}
+                        ${isToday ? "ring-2 ring-glow-gold-dark ring-offset-1" : ""}
+                      `}
+                    >
+                      <span className={`font-inter text-xs font-semibold
+                        ${active ? "text-glow-text" : isFuture ? "text-glow-text-muted/30" : "text-glow-text-muted"}
+                      `}>
+                        {day}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex items-center gap-3 mt-3 justify-end">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-glow-cream" />
+                  <span className="font-inter text-[10px] text-glow-text-muted">Sin actividad</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-glow-gold" />
+                  <span className="font-inter text-[10px] text-glow-text-muted">Activa</span>
+                </div>
+              </div>
+            </>
+          );
+        })()}
       </div>
 
       {/* Barras por mes */}
