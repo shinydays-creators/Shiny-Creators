@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getLocalDate } from "@/lib/streak";
 import ShinyTitle from "@/components/ShinyTitle";
 import BottomNav from "@/components/BottomNav";
 import DailyTracker from "@/components/DailyTracker";
@@ -10,8 +9,9 @@ export default async function HomePage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
+  // 90 días atrás en UTC — solo para limitar volumen de datos
   const since = new Date();
-  since.setDate(since.getDate() - 90);
+  since.setDate(since.getDate() - 91); // 91 para cubrir desfase de zona horaria
 
   const [{ data: profile }, { data: logs }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
@@ -22,11 +22,17 @@ export default async function HomePage() {
       .order("log_date", { ascending: false }),
   ]);
 
-  const today = getLocalDate();
-  const todayLog = (logs ?? []).find(l => l.log_date === today);
-  const logDates = (logs ?? []).map(l => l.log_date as string);
+  // Si el onboarding no está completado, redirigir automáticamente
+  if (!profile?.onboarding_done) redirect("/onboarding");
 
   const userName = profile?.full_name || user.email?.split("@")[0] || "creadora";
+
+  // Pasamos todos los logs al cliente — el cliente calcula "hoy" con su hora local
+  const allLogs = (logs ?? []).map(l => ({
+    log_date: l.log_date as string,
+    activities: (l.activities ?? []) as string[],
+    challenge_completed: l.challenge_completed as boolean,
+  }));
 
   return (
     <main className="min-h-screen bg-glow-gradient flex flex-col overflow-hidden pb-24">
@@ -41,9 +47,7 @@ export default async function HomePage() {
 
       <div className="relative z-10 flex-1 px-6 pb-10">
         <DailyTracker
-          initialLogs={logDates}
-          todayActivities={(todayLog?.activities ?? []) as string[]}
-          todayChallengeCompleted={todayLog?.challenge_completed ?? false}
+          allLogs={allLogs}
           streakRecord={profile?.streak_record ?? 0}
           userName={userName}
           platform={profile?.platform ?? ""}

@@ -2,6 +2,17 @@
 
 import { createClient } from "@/lib/supabase/server";
 
+function generateReferralCode(userId: string): string {
+  // 6 caracteres alfanuméricos basados en el userId
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    const seed = userId.charCodeAt(i % userId.length) + i * 17;
+    code += chars[seed % chars.length];
+  }
+  return code;
+}
+
 export async function saveOnboardingAction(data: Record<string, string>) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -10,10 +21,20 @@ export async function saveOnboardingAction(data: Record<string, string>) {
     return { error: "No hay sesión activa" };
   }
 
+  // Comprobar si ya tiene código de invitación
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("referral_code")
+    .eq("id", user.id)
+    .single();
+
+  const referralCode = existing?.referral_code || generateReferralCode(user.id);
+
   const { error } = await supabase
     .from("profiles")
     .update({
       onboarding_done:    true,
+      referral_code:      referralCode,
       platform:           data.platform        ?? null,
       platform_custom:    data.platform_custom  ?? null,
       current_followers:  data.followers        ?? null,

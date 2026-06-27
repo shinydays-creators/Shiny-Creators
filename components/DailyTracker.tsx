@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import MascotStar from "@/components/MascotStar";
 import { calculateStreak, getLocalDate, getLastNDays, shortDayName } from "@/lib/streak";
@@ -43,10 +43,14 @@ function getDailyChallenge(): string {
   return DAILY_CHALLENGES[dayOfYear % DAILY_CHALLENGES.length];
 }
 
+interface LogEntry {
+  log_date: string;
+  activities: string[];
+  challenge_completed: boolean;
+}
+
 interface Props {
-  initialLogs: string[];
-  todayActivities: string[];
-  todayChallengeCompleted: boolean;
+  allLogs: LogEntry[];
   streakRecord: number;
   userName: string;
   platform: string;
@@ -55,9 +59,7 @@ interface Props {
 }
 
 export default function DailyTracker({
-  initialLogs,
-  todayActivities,
-  todayChallengeCompleted,
+  allLogs,
   streakRecord,
   userName,
   platform,
@@ -65,7 +67,14 @@ export default function DailyTracker({
   level,
 }: Props) {
   const router = useRouter();
-  const [logs, setLogs] = useState<string[]>(initialLogs);
+
+  // "hoy" se calcula siempre en el cliente con su hora local
+  const today = getLocalDate();
+  const todayLog = allLogs.find(l => l.log_date === today);
+  const todayActivities = todayLog?.activities ?? [];
+  const todayChallengeCompleted = todayLog?.challenge_completed ?? false;
+
+  const [logs, setLogs] = useState<string[]>(allLogs.map(l => l.log_date));
   const [selected, setSelected] = useState<string[]>(todayActivities);
   const [savedActivities, setSavedActivities] = useState<string[]>(todayActivities);
   const [challengeDone, setChallengeDone] = useState(todayChallengeCompleted);
@@ -75,7 +84,18 @@ export default function DailyTracker({
   const [xpToast, setXpToast] = useState<number | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const today = getLocalDate();
+  // Sincroniza estado cuando llegan nuevos datos del servidor tras router.refresh()
+  useEffect(() => {
+    const freshLog = allLogs.find(l => l.log_date === today);
+    const freshActivities = freshLog?.activities ?? [];
+    const freshChallenge = freshLog?.challenge_completed ?? false;
+    setLogs(allLogs.map(l => l.log_date));
+    setSavedActivities(freshActivities);
+    setSelected(prev => [...new Set([...freshActivities, ...prev.filter(a => freshActivities.includes(a))])]);
+    setSavedChallenge(freshChallenge);
+    if (freshChallenge) setChallengeDone(true);
+  }, [allLogs]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const savedToday = logs.includes(today);
   const streak = calculateStreak(logs);
   const record = Math.max(streak, streakRecord);
