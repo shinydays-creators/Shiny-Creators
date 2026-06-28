@@ -181,7 +181,7 @@ function CalcSection() {
                   <p className="font-poppins text-xl font-bold text-glow-gold-dark">{result.recommended}€</p>
                 </div>
                 <div className="bg-glow-pink/10 rounded-xl p-3 text-center">
-                  <p className="font-inter text-xs text-glow-text-muted mb-1">Premium</p>
+                  <p className="font-inter text-xs text-glow-text-muted mb-1">Máximo</p>
                   <p className="font-poppins text-xl font-bold text-glow-text">{result.premium}€</p>
                 </div>
               </div>
@@ -194,9 +194,12 @@ function CalcSection() {
                   <span className="font-semibold text-glow-text">Ideal:</span> Tu precio estándar. No bajes de aquí sin motivo claro.
                 </p>
                 <p className="font-inter text-xs text-glow-text-muted leading-relaxed">
-                  <span className="font-semibold text-glow-text">Premium:</span> Para marcas grandes o cuando te piden derechos de uso.
+                  <span className="font-semibold text-glow-text">Máximo:</span> Para marcas grandes o cuando te piden derechos de uso.
                 </p>
               </div>
+              <p className="font-inter text-[10px] text-glow-text-muted text-center mt-2">
+                ✅ Esta calculadora es gratuita para todas las creadoras
+              </p>
             </div>
           )}
         </div>
