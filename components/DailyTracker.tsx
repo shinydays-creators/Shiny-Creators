@@ -82,6 +82,7 @@ export default function DailyTracker({
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [xpToast, setXpToast] = useState<number | null>(null);
+  const [firstDayCelebration, setFirstDayCelebration] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   // Sincroniza estado cuando llegan nuevos datos del servidor tras router.refresh()
@@ -129,6 +130,7 @@ export default function DailyTracker({
 
     if (result?.success) {
       setSaveError(null);
+      const isFirstEver = logs.length === 0;
       const newLogs = savedToday ? logs : [...logs, today];
       setLogs(newLogs);
       setSavedActivities(selected);
@@ -137,7 +139,10 @@ export default function DailyTracker({
       const newStreak = calculateStreak(newLogs);
       if (newStreak > record) await updateStreakRecord(newStreak);
 
-      if (result.xpGained && result.xpGained > 0) {
+      if (isFirstEver) {
+        setFirstDayCelebration(true);
+        setTimeout(() => setFirstDayCelebration(false), 4000);
+      } else if (result.xpGained && result.xpGained > 0) {
         setXpToast(result.xpGained);
         setTimeout(() => setXpToast(null), 3000);
       }
@@ -160,6 +165,24 @@ export default function DailyTracker({
       {xpToast && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-glow-gold text-white font-poppins font-bold text-sm px-5 py-2.5 rounded-full shadow-lg animate-fade-up">
           +{xpToast} XP ✨
+        </div>
+      )}
+
+      {/* Celebración primer día */}
+      {firstDayCelebration && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-8">
+          <div className="bg-white rounded-3xl shadow-soft-lg p-8 text-center max-w-xs w-full animate-fade-up">
+            <MascotStar mood="excited" size={100} animate className="mx-auto mb-4" />
+            <h2 className="font-poppins text-xl font-black text-glow-text mb-2">
+              ¡Tu primera estrella! 🌟
+            </h2>
+            <p className="font-inter text-sm text-glow-text-muted leading-relaxed mb-4">
+              Acabas de registrar tu primer día. Así es como empieza todo lo grande. ¡A por la racha!
+            </p>
+            <div className="bg-glow-gold/10 rounded-2xl px-4 py-2">
+              <p className="font-poppins text-xs font-bold text-glow-gold-dark">✨ ¡Racha iniciada!</p>
+            </div>
+          </div>
         </div>
       )}
 
