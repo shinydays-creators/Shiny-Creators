@@ -113,7 +113,7 @@ export default function VictoriesClient({ victories: initial, userName, xp, leve
           <div className="flex-1 min-w-0">
             <h2 className="font-poppins text-lg font-bold text-glow-text truncate">{displayName}</h2>
             <p className="font-inter text-xs text-glow-text-muted">Nivel {level} · {info.name}</p>
-            <p className="font-inter text-xs text-glow-text-muted">{xp} XP · 🏆 {streakRecord} días de racha</p>
+            <p className="font-inter text-xs text-glow-text-muted">{xp} XP · 🏆 {streakRecord} {streakRecord === 1 ? "día" : "días"} de racha</p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2 mt-4">

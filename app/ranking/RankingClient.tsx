@@ -42,10 +42,18 @@ export default function RankingClient({ profiles, currentUserId }: Props) {
 
       {profiles.length === 0 && (
         <div className="text-center py-16">
-          <p className="text-4xl mb-3">🌱</p>
-          <p className="font-poppins text-base font-bold text-glow-text">¡Sé la primera!</p>
-          <p className="font-inter text-sm text-glow-text-muted mt-1">
-            Aún no hay creadoras en el ranking. Guarda tu primer día para aparecer aquí.
+          <p className="text-4xl mb-3">✨</p>
+          <p className="font-poppins text-base font-bold text-glow-text">¡Eres de las primeras!</p>
+          <p className="font-inter text-sm text-glow-text-muted mt-2">
+            La comunidad está arrancando. Guarda tu primer día y aparece aquí antes que nadie.
+          </p>
+        </div>
+      )}
+
+      {profiles.length > 0 && profiles.length < 20 && (
+        <div className="bg-glow-gold/10 border border-glow-gold/30 rounded-2xl px-4 py-3 mb-5 text-center">
+          <p className="font-inter text-xs text-glow-text-muted">
+            🌱 La comunidad está arrancando — eres de las primeras creadoras. ¡El ranking crecerá contigo!
           </p>
         </div>
       )}
@@ -64,8 +72,8 @@ export default function RankingClient({ profiles, currentUserId }: Props) {
         </div>
       )}
 
-      {/* Podio top 3 */}
-      {top3.length > 0 && (
+      {/* Podio top 3 — solo si hay al menos 3 creadoras */}
+      {top3.length >= 3 && (
         <div className="flex items-end justify-center gap-3 mb-6">
           {/* 2º */}
           {top3[1] && (
@@ -123,11 +131,11 @@ export default function RankingClient({ profiles, currentUserId }: Props) {
         </div>
       )}
 
-      {/* Lista del 4 en adelante */}
-      {rest.length > 0 && (
+      {/* Lista: desde el 4 si hay podio, desde el 1 si hay menos de 3 creadoras */}
+      {profiles.length > 0 && (top3.length < 3 ? profiles : rest).length > 0 && (
         <div className="flex flex-col gap-2">
-          {rest.map((profile, i) => {
-            const pos = i + 4;
+          {(top3.length < 3 ? profiles : rest).map((profile, i) => {
+            const pos = top3.length < 3 ? i + 1 : i + 4;
             const isMe = profile.id === currentUserId;
             const info = levelInfo(profile.level);
             return (
@@ -151,7 +159,7 @@ export default function RankingClient({ profiles, currentUserId }: Props) {
                     {firstName(profile.full_name)}{isMe && " (tú)"}
                   </p>
                   <p className="font-inter text-[10px] text-glow-text-muted">
-                    {info.emoji} Nivel {profile.level} · 🏆 {profile.streak_record}d récord
+                    {info.emoji} Nivel {profile.level} · 🏆 {profile.streak_record} {profile.streak_record === 1 ? "día" : "días"} récord
                   </p>
                 </div>
                 <span className="font-poppins text-sm font-bold text-glow-gold-dark flex-shrink-0">

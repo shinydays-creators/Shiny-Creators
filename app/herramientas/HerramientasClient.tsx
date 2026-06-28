@@ -115,12 +115,12 @@ function CalcSection() {
         <div>
           <label className="font-inter text-xs text-glow-text-muted mb-1 block font-medium">Seguidores</label>
           <input value={followers} onChange={e => setFollowers(e.target.value)}
-            placeholder="Ej: 5000" type="number" className="input-glow text-sm" />
+            placeholder="Ej: 5000" type="number" inputMode="numeric" className="input-glow text-sm" />
         </div>
         <div>
           <label className="font-inter text-xs text-glow-text-muted mb-1 block font-medium">Vistas medias</label>
           <input value={views} onChange={e => setViews(e.target.value)}
-            placeholder="Ej: 800" type="number" className="input-glow text-sm" />
+            placeholder="Ej: 800" type="number" inputMode="numeric" className="input-glow text-sm" />
         </div>
       </div>
 
