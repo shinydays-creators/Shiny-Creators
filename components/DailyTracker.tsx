@@ -20,27 +20,116 @@ const ACTIVITIES = [
   { id: "community", emoji: "💬", label: "Interactuar con tu comunidad" },
 ];
 
-const DAILY_CHALLENGES = [
+// Retos base (para todas)
+const CHALLENGES_BASE = [
   "Responde a 5 comentarios de tu comunidad",
   "Escribe 10 ideas de contenido para esta semana",
-  "Analiza un creador de tu nicho",
-  "Busca 3 marcas con las que te gustaría colaborar",
+  "Analiza un creador de tu nicho y apunta qué hace bien",
   "Graba un clip de 15 segundos aunque no lo publiques",
-  "Mejora la miniatura de uno de tus vídeos",
-  "Investiga una tendencia de tu plataforma",
-  "Escribe el guión de tu próximo vídeo",
+  "Investiga una tendencia de tu plataforma hoy",
+  "Escribe el guión o estructura de tu próximo contenido",
   "Deja comentarios valiosos en 3 publicaciones de tu nicho",
-  "Crea una encuesta para conocer mejor a tu audiencia",
   "Organiza tu carpeta de ideas y borra lo obsoleto",
   "Graba un detrás de cámaras de tu proceso creativo",
+  "Crea una encuesta para conocer mejor a tu audiencia",
+  "Dedica 20 minutos a mejorar una publicación antigua",
+  "Busca inspiración en un nicho diferente al tuyo",
 ];
 
-function getDailyChallenge(): string {
+// Retos para quien quiere monetizar / colaboraciones
+const CHALLENGES_MONEY = [
+  "Busca 3 marcas con las que te gustaría colaborar y anota su email de contacto",
+  "Prepara o mejora tu kit de medios (media kit) con tus datos actualizados",
+  "Investiga cuánto cobra un creador similar a ti por colaboraciones",
+  "Escribe un email de pitch a una marca como práctica, aunque no lo envíes",
+  "Revisa y mejora tu bio para que quede claro que estás abierta a colaboraciones",
+  "Calcula tu tarifa mínima para el próximo mes con la calculadora de la app",
+  "Busca hashtags o comunidades donde marcas de tu nicho buscan creadores",
+];
+
+// Retos para quien quiere crecer en seguidores
+const CHALLENGES_GROW = [
+  "Publica o programa un contenido optimizado para el algoritmo de tu plataforma",
+  "Estudia las estadísticas de tu último contenido y apunta qué cambiarías",
+  "Interactúa con 10 cuentas nuevas de tu nicho (comenta, no solo likes)",
+  "Crea un contenido que responda a una pregunta frecuente de tu audiencia",
+  "Escribe 5 títulos o hooks para tu próximo vídeo y quédate con el mejor",
+  "Analiza qué contenido tuyo ha tenido más alcance y por qué",
+  "Busca una colaboración con otra creadora de tamaño similar",
+];
+
+// Retos para plataforma YouTube
+const CHALLENGES_YOUTUBE = [
+  "Mejora la miniatura de uno de tus vídeos publicados",
+  "Revisa las primeras palabras de la descripción de tus últimos 3 vídeos",
+  "Añade tarjetas o pantallas finales a un vídeo que no las tenga",
+  "Revisa qué palabras clave están funcionando mejor en tu canal esta semana",
+  "Responde a todos los comentarios sin respuesta de tu último vídeo",
+];
+
+// Retos para TikTok / Reels
+const CHALLENGES_SHORTFORM = [
+  "Crea un vídeo usando un audio tendencia de esta semana",
+  "Graba una versión alternativa de tu contenido más visto",
+  "Estudia los primeros 3 segundos de tus 5 vídeos con más views",
+  "Sube un vídeo en el horario en que más activa está tu audiencia",
+  "Prueba un formato nuevo: dueto, stitch, POV, o transición creativa",
+];
+
+// Retos para nicho lifestyle / bienestar
+const CHALLENGES_LIFESTYLE = [
+  "Comparte un proceso real de tu día sin filtros ni edición excesiva",
+  "Graba un 'vlog de 60 segundos' de algo que hiciste hoy",
+  "Crea contenido sobre un hábito tuyo que tu audiencia no conoce",
+  "Responde a una pregunta de tu comunidad con un vídeo personal",
+];
+
+// Retos para nicho educación / formación
+const CHALLENGES_EDUCATION = [
+  "Explica un concepto de tu nicho en menos de 60 segundos",
+  "Transforma una pregunta frecuente de tu audiencia en un post o vídeo",
+  "Busca 3 datos o estadísticas recientes de tu área que puedas compartir",
+  "Crea un contenido 'mitos vs realidad' sobre tu tema",
+];
+
+function getDailyChallenge(profile?: { niche?: string; platform?: string; contentReason?: string; goal3m?: string }): string {
   const today = getLocalDate();
   const dayOfYear = Math.floor(
     (new Date(today).getTime() - new Date(today.slice(0, 4) + "-01-01").getTime()) / 86400000
   );
-  return DAILY_CHALLENGES[dayOfYear % DAILY_CHALLENGES.length];
+
+  // Construir pool personalizado
+  let pool = [...CHALLENGES_BASE];
+
+  if (profile?.contentReason?.toLowerCase().includes("diner") ||
+      profile?.contentReason?.toLowerCase().includes("monetiz") ||
+      profile?.contentReason?.toLowerCase().includes("colabor") ||
+      profile?.contentReason?.toLowerCase().includes("marca")) {
+    pool = [...pool, ...CHALLENGES_MONEY];
+  }
+
+  if (profile?.goal3m?.toLowerCase().includes("seguidor") ||
+      profile?.goal3m?.toLowerCase().includes("crecer") ||
+      profile?.goal3m?.toLowerCase().includes("viral") ||
+      profile?.goal3m?.toLowerCase().includes("alcance")) {
+    pool = [...pool, ...CHALLENGES_GROW];
+  }
+
+  const plat = profile?.platform?.toLowerCase() ?? "";
+  if (plat.includes("youtube")) pool = [...pool, ...CHALLENGES_YOUTUBE];
+  if (plat.includes("tiktok") || plat.includes("instagram") || plat.includes("reel")) {
+    pool = [...pool, ...CHALLENGES_SHORTFORM];
+  }
+
+  const niche = profile?.niche?.toLowerCase() ?? "";
+  if (niche.includes("lifestyle") || niche.includes("bienestar") || niche.includes("vida")) {
+    pool = [...pool, ...CHALLENGES_LIFESTYLE];
+  }
+  if (niche.includes("educaci") || niche.includes("formaci") || niche.includes("aprend")) {
+    pool = [...pool, ...CHALLENGES_EDUCATION];
+  }
+
+  return pool[dayOfYear % pool.length];
 }
 
 interface LogEntry {
@@ -56,6 +145,9 @@ interface Props {
   platform: string;
   xp: number;
   level: number;
+  niche?: string;
+  contentReason?: string;
+  goal3m?: string;
 }
 
 export default function DailyTracker({
@@ -65,6 +157,9 @@ export default function DailyTracker({
   platform,
   xp,
   level,
+  niche,
+  contentReason,
+  goal3m,
 }: Props) {
   const router = useRouter();
 
@@ -101,7 +196,7 @@ export default function DailyTracker({
   const streak = calculateStreak(logs);
   const record = Math.max(streak, streakRecord);
   const last7 = getLastNDays(7).reverse();
-  const challenge = getDailyChallenge();
+  const challenge = getDailyChallenge({ niche, platform, contentReason, goal3m });
   const info = levelInfo(level);
   const nextLevelXp = [100, 300, 700, 1500, 9999][Math.min(level - 1, 4)];
   const prevLevelXp = [0, 100, 300, 700, 1500][Math.min(level - 1, 4)];
@@ -186,28 +281,49 @@ export default function DailyTracker({
         </div>
       )}
 
-      {/* Hero — racha prominente + mascota */}
-      <div className="bg-white rounded-3xl shadow-soft px-5 pt-5 pb-4 flex items-center gap-4">
-        <MascotStar mood={mascotMood} size={90} animate />
-        <div className="flex-1">
-          <p className="font-inter text-xs text-glow-text-muted mb-0.5">
-            ¡Hola, {userName}! 👋
-          </p>
-          <div className="flex items-end gap-2">
-            <span className="font-poppins text-6xl font-black text-glow-text leading-none">{streak}</span>
-            <div className="pb-1">
-              <p className="font-poppins text-sm font-bold text-glow-gold-dark leading-tight">🔥 días</p>
-              <p className="font-inter text-[10px] text-glow-text-muted leading-tight">de racha</p>
+      {/* Hero — bienvenida si es el primer día, racha si ya tiene días */}
+      {logs.length === 0 ? (
+        <div className="bg-white rounded-3xl shadow-soft px-5 pt-5 pb-5">
+          <div className="flex items-center gap-4 mb-4">
+            <MascotStar mood="happy" size={80} animate />
+            <div className="flex-1">
+              <p className="font-inter text-xs text-glow-text-muted mb-0.5">¡Hola, {userName}! 👋</p>
+              <p className="font-poppins text-lg font-black text-glow-text leading-tight">
+                Bienvenida a tu primer día ✨
+              </p>
+              <p className="font-inter text-xs text-glow-text-muted mt-1">
+                Marca lo que hayas hecho hoy y empieza tu racha.
+              </p>
             </div>
           </div>
-          {record > 0 && streak < record && (
-            <p className="font-inter text-[10px] text-glow-text-muted mt-1">🏆 Récord: {record} días</p>
-          )}
-          {streak > 0 && streak === record && streak > 1 && (
-            <p className="font-inter text-[10px] text-glow-gold-dark mt-1 font-semibold">🏆 ¡Tu mejor racha!</p>
-          )}
+          <div className="bg-glow-gold/10 border border-glow-gold/30 rounded-2xl px-4 py-3">
+            <p className="font-poppins text-xs font-bold text-glow-gold-dark mb-1">⭐ Tu reto de hoy:</p>
+            <p className="font-inter text-sm text-glow-text leading-snug">{challenge}</p>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-white rounded-3xl shadow-soft px-5 pt-5 pb-4 flex items-center gap-4">
+          <MascotStar mood={mascotMood} size={90} animate />
+          <div className="flex-1">
+            <p className="font-inter text-xs text-glow-text-muted mb-0.5">
+              ¡Hola, {userName}! 👋
+            </p>
+            <div className="flex items-end gap-2">
+              <span className="font-poppins text-6xl font-black text-glow-text leading-none">{streak}</span>
+              <div className="pb-1">
+                <p className="font-poppins text-sm font-bold text-glow-gold-dark leading-tight">🔥 {streak === 1 ? "día" : "días"}</p>
+                <p className="font-inter text-[10px] text-glow-text-muted leading-tight">de racha</p>
+              </div>
+            </div>
+            {record > 0 && streak < record && (
+              <p className="font-inter text-[10px] text-glow-text-muted mt-1">🏆 Récord: {record} {record === 1 ? "día" : "días"}</p>
+            )}
+            {streak > 0 && streak === record && streak > 1 && (
+              <p className="font-inter text-[10px] text-glow-gold-dark mt-1 font-semibold">🏆 ¡Tu mejor racha!</p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Banner motivador */}
       <MotivationalBanner

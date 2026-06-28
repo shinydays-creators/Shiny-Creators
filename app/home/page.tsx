@@ -53,6 +53,9 @@ export default async function HomePage() {
           platform={profile?.platform ?? ""}
           xp={profile?.xp ?? 0}
           level={profile?.level ?? 1}
+          niche={profile?.niche ?? ""}
+          contentReason={profile?.content_reason ?? ""}
+          goal3m={profile?.goal_3months ?? ""}
         />
       </div>
 
