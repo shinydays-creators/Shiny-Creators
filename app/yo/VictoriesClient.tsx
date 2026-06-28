@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import ShinyTitle from "@/components/ShinyTitle";
+import MascotStar from "@/components/MascotStar";
 import { levelInfo } from "@/lib/levels";
 import { addVictory, deleteVictory } from "./actions";
 
@@ -107,9 +108,7 @@ export default function VictoriesClient({ victories: initial, userName, xp, leve
       {/* Resumen */}
       <div className="bg-white rounded-3xl shadow-soft-lg p-5 mb-4">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-glow-gold to-glow-pink flex items-center justify-center flex-shrink-0">
-            <span className="text-2xl">{info.emoji}</span>
-          </div>
+          <MascotStar mood="happy" size={64} className="flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <h2 className="font-poppins text-lg font-bold text-glow-text truncate">{displayName}</h2>
             <p className="font-inter text-xs text-glow-text-muted">Nivel {level} · {info.name}</p>
@@ -216,7 +215,7 @@ export default function VictoriesClient({ victories: initial, userName, xp, leve
 
         {victories.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-soft p-6 text-center">
-            <p className="text-4xl mb-3">🌱</p>
+            <MascotStar mood="happy" size={56} className="mx-auto mb-3" />
             <p className="font-poppins font-semibold text-glow-text text-sm">Aquí vivirán tus victorias</p>
             <p className="font-inter text-xs text-glow-text-muted mt-1 leading-relaxed">
               Cada logro cuenta, por pequeño que sea. ¡Añade tu primera victoria!
